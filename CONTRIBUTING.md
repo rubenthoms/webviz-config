@@ -28,7 +28,7 @@ A plugin usually does three things:
 
 ### Minimal plugin
 
-Of the three things mentioned above, it is only the `layout` proprety that is
+Of the three things mentioned above, it is only the `layout` property that is
 mandatory to provide. A minimal plugin could look like:
 
 ```python
@@ -40,7 +40,7 @@ from webviz_config import WebvizPluginABC
 class ExamplePlugin(WebvizPluginABC):
 
     @property
-    def layout(self):
+    def layout(self) -> html.Div:
         return html.Div([
                          html.H1('This is a static title'),
                          'And this is just some ordinary text'
@@ -49,7 +49,7 @@ class ExamplePlugin(WebvizPluginABC):
 
 If the file containing `ExamplePlugin` is saved to [./webviz_config/plugins](./webviz_config/plugins),
 and then added to the corresponding [\_\_init\_\_ file](./webviz_config/plugins/__init__.py)
-you are done. Alternatively you can create your plugins in a separate Python project and `setup.py`.
+you are done. Alternatively, you can create your plugins in a separate Python project and `setup.py`.
 You can then configure the installation by using something like:
 ```python
 setup(
@@ -64,7 +64,7 @@ setup(
 ```
 See [webviz-subsurface](https://github.com/equinor/webviz-subsurface) for example of this usage.
 
-After installation, the user can then include the plugin through a configuration file, e.g.
+After its installation, the user can then include the plugin through a configuration file, e.g.
 
 ```yaml
 title: Simple Webviz example
@@ -93,6 +93,7 @@ backend, you can add callbacks. A simple example of this is given below.
 ```python
 from uuid import uuid4
 
+import dash
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from webviz_config import WebvizPluginABC
@@ -100,7 +101,7 @@ from webviz_config import WebvizPluginABC
 
 class ExamplePlugin(WebvizPluginABC):
 
-    def __init__(self, app):
+    def __init__(self, app: dash.Dash):
 
         super().__init__()
 
@@ -110,7 +111,7 @@ class ExamplePlugin(WebvizPluginABC):
         self.set_callbacks(app)
 
     @property
-    def layout(self):
+    def layout(self) -> html.Div:
         return html.Div([
                          html.H1('This is a static title'),
                          html.Button(id=self.button_id, n_clicks=0,
@@ -118,10 +119,10 @@ class ExamplePlugin(WebvizPluginABC):
                          html.Div(id=self.div_id)
                         ])
 
-    def set_callbacks(self, app):
+    def set_callbacks(self, app: dash.Dash) -> None:
         @app.callback(Output(self.div_id, 'children'),
                       [Input(self.button_id, 'n_clicks')])
-        def _update_output(n_clicks):
+        def _update_output(n_clicks: Optional[int]):
             return f'Button has been pressed {n_clicks} times.'
 ```
 
@@ -158,8 +159,8 @@ callback is set. A typical compressed data download callback will look like
 def _user_download_data(data_requested):
     return (
         WebvizPluginABC.plugin_compressed_data(
-            filename="webviz-data.zip",
-            content=[{"filename": "some_file.txt", "content": "Some download data"}],
+            filename: str = "webviz-data.zip",
+            content: List[Dict[str, str]] = [{"filename": "some_file.txt", "content": "Some download data"}],
         )
         if data_requested
         else None
@@ -209,7 +210,7 @@ from webviz_config import WebvizPluginABC
 
 class ExamplePlugin(WebvizPluginABC):
 
-    def __init__(self, title: str, number: int=42):
+    def __init__(self, title: str, number: int = 42) -> None:
 
         super().__init__()
 
@@ -217,7 +218,7 @@ class ExamplePlugin(WebvizPluginABC):
         self.number = number
 
     @property
-    def layout(self):
+    def layout(self) -> html.Div:
         return html.Div([
                          html.H1(self.title),
                          f'This is your number: {self.number}'
