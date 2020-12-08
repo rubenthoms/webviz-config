@@ -91,6 +91,7 @@ If you want to include user interactivity which triggers actions in the Python
 backend, you can add callbacks. A simple example of this is given below.
 
 ```python
+from typing import Optional
 from uuid import uuid4
 
 import dash
@@ -101,7 +102,7 @@ from webviz_config import WebvizPluginABC
 
 class ExamplePlugin(WebvizPluginABC):
 
-    def __init__(self, app: dash.Dash):
+    def __init__(self, app: dash.Dash) -> None:
 
         super().__init__()
 
@@ -122,7 +123,7 @@ class ExamplePlugin(WebvizPluginABC):
     def set_callbacks(self, app: dash.Dash) -> None:
         @app.callback(Output(self.div_id, 'children'),
                       [Input(self.button_id, 'n_clicks')])
-        def _update_output(n_clicks: Optional[int]):
+        def _update_output(n_clicks: Optional[int]) -> str:
             return f'Button has been pressed {n_clicks} times.'
 ```
 
@@ -154,9 +155,11 @@ the `WebvizPluginABC` class. However, it will only appear if the corresponding
 callback is set. A typical compressed data download callback will look like
 
 ```python
+from typing import List, Dict, Tuple
+
 @app.callback(self.plugin_data_output,
               self.plugin_data_requested)
-def _user_download_data(data_requested):
+def _user_download_data(data_requested: bool) -> WebvizPluginABC.EncodedFile:
     return (
         WebvizPluginABC.plugin_compressed_data(
             filename: str = "webviz-data.zip",
@@ -171,7 +174,7 @@ A typical CSV data download from e.g. a `pandas.DataFrame` will look like:
 ```python
 @app.callback(self.plugin_data_output,
               self.plugin_data_requested)
-def _user_download_data(data_requested):
+def _user_download_data(data_requested: bool) -> Dict[str, str]:
     return (
         {
             "filename": "some-file.csv",
@@ -351,23 +354,23 @@ from webviz_config import WebvizPluginABC
 
 class ExamplePortable(WebvizPluginABC):
 
-    def __init__(self, some_number: int):
+    def __init__(self, some_number: int) -> None:
 
         super().__init__()
 
         self.some_number = some_number
 
-    def add_webvizstore(self):
+    def add_webvizstore(self) -> List[Tuple[Callable, List[Dict[str, Any]]]]:
         return [(input_data_function, [{'some_number': self.some_number}])]
 
     @property
-    def layout(self):
+    def layout(self) -> str:
         return str(input_data_function(self.some_number))
 
 
 @CACHE.memoize(timeout=CACHE.TIMEOUT)
 @webvizstore
-def input_data_function(some_number) -> pd.DataFrame:
+def input_data_function(some_number: int) -> pd.DataFrame:
     print("This time I'm actually doing the calculation...")
     return pd.DataFrame(data={'col1': [some_number,   some_number*2],
                               'col2': [some_number*3, some_number*4]})
@@ -434,10 +437,13 @@ absolute path.
 The way you subscribe to a shared setting is that you in your Python package add
 something like
 ```python
+from typing import Any
+from pathlib import Path
+
 import webviz_config
 
 @webviz_config.SHARED_SETTINGS_SUBSCRIPTIONS.subscribe("some_key")
-def subscribe(some_key, config_folder, portable):
+def subscribe(some_key: Any, config_folder: Path, portable: bool) -> Any:
     # The input argument some_key given to this function is equal to
     # shared_settings["some_key"] provided by the user from the configuration file.
 
@@ -472,14 +478,14 @@ from webviz_config import WebvizPluginABC
 
 class OurCustomPlugin(WebvizPluginABC):
 
-    def __init__(self, title: str):
+    def __init__(self, title: str) -> None:
 
         super().__init__()
 
         self.title = title
 
     @property
-    def layout(self):
+    def layout(self) -> html.Div:
         return html.Div([
                          html.H1(self.title),
                          'This is just some ordinary text'
