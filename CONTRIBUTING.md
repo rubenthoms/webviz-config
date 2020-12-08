@@ -159,7 +159,7 @@ from typing import List, Dict, Tuple
 
 @app.callback(self.plugin_data_output,
               self.plugin_data_requested)
-def _user_download_data(data_requested: bool) -> WebvizPluginABC.EncodedFile:
+def _user_download_data(data_requested: bool) -> Optional[WebvizPluginABC.EncodedFile]:
     return (
         WebvizPluginABC.plugin_compressed_data(
             filename: str = "webviz-data.zip",
@@ -172,9 +172,11 @@ def _user_download_data(data_requested: bool) -> WebvizPluginABC.EncodedFile:
 
 A typical CSV data download from e.g. a `pandas.DataFrame` will look like:
 ```python
+from typing import Dict, Tuple, Optional
+
 @app.callback(self.plugin_data_output,
               self.plugin_data_requested)
-def _user_download_data(data_requested: bool) -> Dict[str, str]:
+def _user_download_data(data_requested: bool) -> Optional[Dict[str, str]]:
     return (
         {
             "filename": "some-file.csv",
