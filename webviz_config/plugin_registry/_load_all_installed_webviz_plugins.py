@@ -1,6 +1,9 @@
 import sys
 import warnings
-from typing import Any, Dict, Iterable, Optional, Type
+from typing import Any, Dict, Iterable, Optional, Type, List, Callable
+
+import inspect
+from ._import_context_manager_class import ImportContextManager
 
 from .._plugin_abc import WebvizPluginABC
 
@@ -35,9 +38,13 @@ class DiscoveredPlugin:
 # pylint: disable=too-few-public-methods
 class LoadedPlugin:
     def __init__(
-        self, plugin_class: Type[WebvizPluginABC], dist_info: PluginDistInfo
+        self,
+        plugin_class: Type[WebvizPluginABC],
+        overloaded_init_methods: Optional[List[Callable]],
+        dist_info: PluginDistInfo,
     ) -> None:
         self.plugin_class = plugin_class
+        self.overloaded_init_methods = overloaded_init_methods
         self.dist_info = dist_info
 
 
@@ -99,7 +106,12 @@ def load_all_installed_webviz_plugins(
     loaded_plugins: Dict[str, LoadedPlugin] = {}
     for plugin_name, discovered_plugin in all_discovered_plugins.items():
 
-        loaded_class_reference = discovered_plugin.entry_point.load()
+        with ImportContextManager() as import_manager:
+            loaded_class_reference = discovered_plugin.entry_point.load()
+
+            overloaded_init_methods = import_manager.get_captured_overloads_of_function(
+                loaded_class_reference.__init__
+            )
 
         # Check that this is actually a plugin that inherits from WebvizPluginABC,
         # and if not, make sure we don't add it.
@@ -112,7 +124,7 @@ def load_all_installed_webviz_plugins(
             continue
 
         loaded_plugins[plugin_name] = LoadedPlugin(
-            loaded_class_reference, discovered_plugin.dist_info
+            loaded_class_reference, overloaded_init_methods, discovered_plugin.dist_info
         )
 
     return loaded_plugins

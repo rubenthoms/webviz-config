@@ -9,6 +9,13 @@ import yaml
 from . import plugin_registry
 from .utils import terminal_colors
 
+import copy
+import json
+import pydantic
+from pydantic.error_wrappers import ValidationError
+from .utils.pydantic_stuff import validate_params_for_single_func
+
+
 SPECIAL_ARGS = ["self", "app", "webviz_settings", "_plugin_creation_spec"]
 
 
@@ -138,6 +145,153 @@ def _call_signature(
 
 class ParserError(Exception):
     pass
+
+
+def _call_signature_pydantic(
+    plugin_name: str,
+    kwargs: dict,
+    config_folder: pathlib.Path,
+    contact_person: typing.Optional[dict] = None,
+) -> PluginCreationSpec:
+    # pylint: disable=too-many-branches,too-many-statements
+    """Takes as input the name of a plugin together with user given arguments
+    (originating from the configuration file). Returns a plugin creation spec that
+    has sufficien information to instantiate the wanted plugin instance (with the
+    given arguments).
+
+    Raises ParserError in the following scenarios:
+      * User is missing a required (i.e. no default value) __init__ argument
+      * User provided an argument not existing in the class' __init__ function
+      * User has given one of the protected arguments in SPECIAL_ARGS
+      * If there is type mismatch between user given argument value, and type
+        hint in __init__ signature (given that type hint exist)
+    """
+
+    ###########################
+
+    ## HACK
+    ## HACK
+    ## HACK
+    ## HACK
+
+    the_plugin_class_reference = plugin_registry.plugin_class(plugin_name)
+
+    my_arg_dict = copy.deepcopy(kwargs)
+
+    # Special handling of "contact_person" key since it is allowd in the YAML file,
+    # but is not a valid argument to the plugin's __init__ methodexists purely as a key
+    if "contact_person" in my_arg_dict:
+        contact_person = my_arg_dict.pop("contact_person")
+        if not isinstance(contact_person, dict):
+            raise ParserError(
+                f"{terminal_colors.RED}{terminal_colors.BOLD}"
+                f"The contact information provided for "
+                f"`{plugin_name}` is not a dictionary. "
+                f"{terminal_colors.END}"
+            )
+
+        if any(key not in ["name", "phone", "email"] for key in contact_person):
+            raise ParserError(
+                f"{terminal_colors.RED}{terminal_colors.BOLD}"
+                f"Unrecognized contact information key given to `{plugin_name}`. "
+                f"Should be 'name', 'phone' and/or 'email'."
+                f"{terminal_colors.END}"
+            )
+
+    param_names_to_ignore = {"self", "app", "webviz_settings"}
+
+    print("\nValidating arg for invocation of", the_plugin_class_reference.__qualname__)
+
+    overloaded_init_methods = plugin_registry.overloaded_init_methods_for_plugin(
+        plugin_name
+    )
+
+    if overloaded_init_methods:
+        print("Validating args against overload(s):")
+        print("------------------------------------")
+
+        validation_err_arr = []
+
+        for a_init_func in overloaded_init_methods:
+            sig = inspect.signature(a_init_func)
+            print(f"OVERLOAD: {a_init_func.__qualname__}{str(sig)}")
+
+            try:
+                validate_params_for_single_func(
+                    a_init_func, param_names_to_ignore, my_arg_dict
+                )
+                print("  ok")
+            except pydantic.error_wrappers.ValidationError as e:
+                validation_err_arr.append(e)
+                print("  FAILED")
+                pass
+
+        if len(validation_err_arr) == len(overloaded_init_methods):
+            print("\nCould not validate these arguments against any of the signatures:")
+            print(json.dumps(my_arg_dict, indent=2))
+            for err, func in zip(validation_err_arr, overloaded_init_methods):
+                sig = inspect.signature(func)
+                print("")
+                print(f"{func.__qualname__}{str(sig)}:")
+                print(err)
+            raise ValueError("Vaidation FAILED")
+
+    else:
+        print("Validating args against normal init():")
+        print("------------------------------------")
+
+        the_init_func = the_plugin_class_reference.__init__
+        print("FUN:", the_init_func.__qualname__)
+
+        sig = inspect.signature(the_init_func)
+        print("SIG:", str(sig))
+
+        validated_params = validate_params_for_single_func(
+            the_init_func, param_names_to_ignore, my_arg_dict
+        )
+
+        if not validated_params:
+            raise ParserError(
+                f"{terminal_colors.RED}{terminal_colors.BOLD}"
+                f"Error for plugin `{plugin_name}`. "
+                f"{terminal_colors.END}"
+            )
+
+        print("Validated params:")
+        print(validated_params)
+
+    ###########################
+
+    _make_all_paths_in_dict_or_list_absolute(config_folder, validated_params)
+
+    argspec = inspect.getfullargspec(the_plugin_class_reference.__init__)
+
+    special_args = ""
+    if "app" in argspec.args:
+        special_args += "app=app, "
+    if "webviz_settings" in argspec.args:
+        special_args += "webviz_settings=webviz_settings, "
+
+    return PluginCreationSpec(
+        plugin_name=f"{plugin_name}",
+        init_arg_str=f"{special_args}**{validated_params}",
+        layout_call_signature_str=f"plugin_layout(contact_person={contact_person})",
+    )
+
+
+def _make_all_paths_in_dict_or_list_absolute(
+    config_folder: pathlib.Path, dict_or_list: typing.Union[dict, list]
+) -> None:
+    for k, v in (
+        dict_or_list.items()
+        if isinstance(dict_or_list, dict)
+        else enumerate(dict_or_list)
+    ):
+        if isinstance(v, pathlib.Path):
+            if not v.is_absolute():
+                dict_or_list[k] = (config_folder / pathlib.Path(v)).resolve()
+        elif isinstance(v, (dict, list)):
+            _make_all_paths_in_dict_or_list_absolute(config_folder, v)
 
 
 class ConfigParser:

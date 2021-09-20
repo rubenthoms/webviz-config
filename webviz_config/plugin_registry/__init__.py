@@ -1,7 +1,7 @@
 """Implements registry that contains all installed plugins
 """
 
-from typing import Dict, List, Type, Callable
+from typing import Dict, List, Type, Callable, Optional
 
 from .._plugin_abc import WebvizPluginABC
 from ._load_all_installed_webviz_plugins import load_all_installed_webviz_plugins
@@ -34,9 +34,8 @@ def plugin_metadata(plugin_name: str) -> PluginDistInfo:
     return _all_loaded_plugins[plugin_name].dist_info
 
 
-# Something along these lines will probably be needed for validation using pydantic
-def overloaded_init_methods_for_plugin(_plugin_name: str) -> List[Callable]:
-    return []
+def overloaded_init_methods_for_plugin(plugin_name: str) -> Optional[List[Callable]]:
+    return _all_loaded_plugins[plugin_name].overloaded_init_methods
 
 
 def all_plugin_names() -> List[str]:

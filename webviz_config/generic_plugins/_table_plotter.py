@@ -2,7 +2,7 @@ import base64
 import inspect
 from pathlib import Path
 from collections import OrderedDict
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, overload
 
 import numpy as np
 import pandas as pd
@@ -40,6 +40,30 @@ If feature is requested, the data could also come from a database.
 * **`lock`:** If `True`, only the plot is shown, \
               all dropdowns for changing plot options are hidden.
 """
+
+    #    # TESTING
+    #    @overload
+    #    def __init__(self, app: Dash, csv_file: Path):
+    #        ...
+    #
+    #    # TESTING
+    #    @overload
+    #    def __init__(self, app: Dash, csv_file: Path, plot_options: dict, lock: bool):
+    #        ...
+    #
+    #    # TESTING
+    #    @overload
+    #    def __init__(
+    #        self,
+    #        app: Dash,
+    #        csv_file: Path,
+    #        plot_options: dict,
+    #        filter_cols: list,
+    #        filter_defaults: dict,
+    #        column_color_discrete_maps: dict,
+    #        lock: bool = False,
+    #    ):
+    #        ...
 
     def __init__(
         self,

@@ -82,6 +82,7 @@ setup(
         "markdown>=3.0",
         "pandas>=1.0",
         "pyarrow>=0.16",
+        "pydantic",
         "pyyaml>=5.1",
         "tqdm>=4.8",
         "importlib-metadata>=1.7; python_version<'3.8'",
