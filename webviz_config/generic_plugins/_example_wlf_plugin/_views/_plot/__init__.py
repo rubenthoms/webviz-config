@@ -1,1 +1,1 @@
-from ._view import PlotView, PlotViewElement, PlotViewSettingsGroup, Kindness
+from ._view import PlotView, PlotViewElement, PlotViewSettingsGroup, Kindness, PlotViewElementSettingsGroup

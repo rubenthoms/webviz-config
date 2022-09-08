@@ -1,1 +1,1 @@
-from ._view import TableView, TableViewElement, TableViewSettingsGroup
+from ._view import TableView, TableViewElement, TableViewSettingsGroup, TableViewElementSettingsGroup

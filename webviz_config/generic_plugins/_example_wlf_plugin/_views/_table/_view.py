@@ -39,14 +39,43 @@ class Order(StrEnum):
     ASC = "asc"
     DESC = "desc"
 
+class TableViewElementSettingsGroup(SettingsGroupABC):
+    class Ids(StrEnum):
+        ORDER_SELECTOR = "order-selector"
+
+    def __init__(self) -> None:
+        super().__init__("Table orientation")
+
+    def layout(self) -> List[Component]:
+        return [
+            wcc.RadioItems(
+                id=self.register_component_unique_id(
+                    TableViewSettingsGroup.Ids.ORDER_SELECTOR
+                ),
+                options=[
+                    {
+                        "label": "ASC",
+                        "value": Order.ASC,
+                    },
+                    {
+                        "label": "DESC",
+                        "value": Order.DESC,
+                    },
+                ],
+                value=Order.ASC,
+            )
+        ]
 
 class TableViewElement(ViewElementABC):
     class Ids(StrEnum):
         TABLE = "table"
+        TABLE_SETTINGS = "table-settings"
 
     def __init__(self, data: List[Tuple[int, int]]) -> None:
         super().__init__()
         self.data = data
+
+        self.add_settings_group(TableViewElementSettingsGroup(), TableViewElement.Ids.TABLE_SETTINGS)
 
     def inner_layout(self) -> Union[str, Type[Component]]:
         return dash_table.DataTable(

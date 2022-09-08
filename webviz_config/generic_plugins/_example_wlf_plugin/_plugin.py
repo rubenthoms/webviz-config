@@ -4,8 +4,8 @@ from dash import Input
 
 from webviz_config import WebvizPluginABC
 from webviz_config.utils import StrEnum
-from ._views._plot import PlotView, PlotViewElement, PlotViewSettingsGroup
-from ._views._table import TableView, TableViewElement, TableViewSettingsGroup
+from ._views._plot import PlotView, PlotViewElement, PlotViewSettingsGroup, PlotViewElementSettingsGroup
+from ._views._table import TableView, TableViewElement, TableViewSettingsGroup, TableViewElementSettingsGroup
 from ._shared_view_elements import TextViewElement
 from ._shared_settings import SharedSettingsGroup
 
@@ -100,6 +100,15 @@ class ExampleWlfPlugin(WebvizPluginABC):
                 "content": "...and here you can swap the axes.",
             },
             {
+                "id": self.view(ExampleWlfPlugin.Ids.PLOT_VIEW)
+                .view_element(PlotView.Ids.PLOT)
+                .settings_group(PlotViewElement.Ids.PLOT_SETTINGS)
+                .component_unique_id(
+                    PlotViewElementSettingsGroup.Ids.COLOR_SELECTOR
+                ),
+                "content": "You can change here which color you prefer.",
+            },
+            {
                 "id": self.view(ExampleWlfPlugin.Ids.TABLE_VIEW)
                 .view_element(TableView.Ids.TABLE)
                 .component_unique_id(TableViewElement.Ids.TABLE),
@@ -110,5 +119,32 @@ class ExampleWlfPlugin(WebvizPluginABC):
                 .settings_group(TableView.Ids.TABLE_SETTINGS)
                 .component_unique_id(TableViewSettingsGroup.Ids.ORDER_SELECTOR),
                 "content": "You can change the order of the table here.",
+            },
+            {
+                "id": self.view(ExampleWlfPlugin.Ids.PLOT_VIEW)
+                .view_element(PlotView.Ids.PLOT)
+                .settings_group(PlotViewElement.Ids.PLOT_SETTINGS)
+                .component_unique_id(
+                    PlotViewElementSettingsGroup.Ids.COLOR_SELECTOR
+                ),
+                "content": "You can change here which color you prefer.",
+            },
+            {
+                "id": self.view(ExampleWlfPlugin.Ids.TABLE_VIEW)
+                .view_element(TableView.Ids.TABLE)
+                .settings_group(TableViewElement.Ids.TABLE_SETTINGS)
+                .component_unique_id(
+                    TableViewElementSettingsGroup.Ids.ORDER_SELECTOR
+                ),
+                "content": "You can change here which order you prefer.",
+            },
+            {
+                "id": self.view(ExampleWlfPlugin.Ids.PLOT_VIEW)
+                .view_element(PlotView.Ids.PLOT)
+                .settings_group(PlotViewElement.Ids.PLOT_SETTINGS)
+                .component_unique_id(
+                    PlotViewElementSettingsGroup.Ids.COLOR_SELECTOR
+                ),
+                "content": "You can change here which color you prefer.",
             },
         ]
