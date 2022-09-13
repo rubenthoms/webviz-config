@@ -4,9 +4,19 @@ from dash import Input
 
 from webviz_config import WebvizPluginABC
 from webviz_config.utils import StrEnum
-from ._views._plot import PlotView, PlotViewElement, PlotViewSettingsGroup, PlotViewElementSettingsGroup
-from ._views._table import TableView, TableViewElement, TableViewSettingsGroup, TableViewElementSettingsGroup
-from ._shared_view_elements import TextViewElement
+from ._views._plot import (
+    PlotView,
+    PlotViewElement,
+    PlotViewSettingsGroup,
+    PlotViewElementSettingsGroup,
+)
+from ._views._table import (
+    TableView,
+    TableViewElement,
+    TableViewSettingsGroup,
+    TableViewElementSettingsGroup,
+)
+from ._shared_view_elements import TextViewElement, TextViewElementSettingsGroup
 from ._shared_settings import SharedSettingsGroup
 
 
@@ -103,10 +113,33 @@ class ExampleWlfPlugin(WebvizPluginABC):
                 "id": self.view(ExampleWlfPlugin.Ids.PLOT_VIEW)
                 .view_element(PlotView.Ids.PLOT)
                 .settings_group(PlotViewElement.Ids.PLOT_SETTINGS)
-                .component_unique_id(
-                    PlotViewElementSettingsGroup.Ids.COLOR_SELECTOR
-                ),
+                .component_unique_id(PlotViewElementSettingsGroup.Ids.COLOR_SELECTOR),
                 "content": "You can change here which color you prefer.",
+            },
+            {
+                "id": self.view(ExampleWlfPlugin.Ids.PLOT_VIEW)
+                .view_element(PlotView.Ids.PLOT)
+                .settings_group(PlotViewElement.Ids.PLOT_SETTINGS_2)
+                .component_unique_id(PlotViewElementSettingsGroup.Ids.COLOR_SELECTOR),
+                "content": "You can change here which color you prefer 2.",
+            },
+            {
+                "id": self.view(ExampleWlfPlugin.Ids.PLOT_VIEW)
+                .view_element(PlotView.Ids.TEXT)
+                .settings_group(TextViewElement.Ids.TEXT_SETTINGS)
+                .component_unique_id(
+                    TextViewElementSettingsGroup.Ids.KINDNESS_SELECTOR
+                ),
+                "content": "You can change the kindness of the text.",
+            },
+            {
+                "id": self.view(ExampleWlfPlugin.Ids.PLOT_VIEW)
+                .view_element(PlotView.Ids.TEXT)
+                .settings_group(TextViewElement.Ids.TEXT_SETTINGS_2)
+                .component_unique_id(
+                    TextViewElementSettingsGroup.Ids.KINDNESS_SELECTOR
+                ),
+                "content": "You can change the kindness of the text.",
             },
             {
                 "id": self.view(ExampleWlfPlugin.Ids.TABLE_VIEW)
@@ -124,27 +157,21 @@ class ExampleWlfPlugin(WebvizPluginABC):
                 "id": self.view(ExampleWlfPlugin.Ids.PLOT_VIEW)
                 .view_element(PlotView.Ids.PLOT)
                 .settings_group(PlotViewElement.Ids.PLOT_SETTINGS)
-                .component_unique_id(
-                    PlotViewElementSettingsGroup.Ids.COLOR_SELECTOR
-                ),
+                .component_unique_id(PlotViewElementSettingsGroup.Ids.COLOR_SELECTOR),
                 "content": "You can change here which color you prefer.",
             },
             {
                 "id": self.view(ExampleWlfPlugin.Ids.TABLE_VIEW)
                 .view_element(TableView.Ids.TABLE)
                 .settings_group(TableViewElement.Ids.TABLE_SETTINGS)
-                .component_unique_id(
-                    TableViewElementSettingsGroup.Ids.ORDER_SELECTOR
-                ),
+                .component_unique_id(TableViewElementSettingsGroup.Ids.ORDER_SELECTOR),
                 "content": "You can change here which order you prefer.",
             },
             {
                 "id": self.view(ExampleWlfPlugin.Ids.PLOT_VIEW)
                 .view_element(PlotView.Ids.PLOT)
                 .settings_group(PlotViewElement.Ids.PLOT_SETTINGS)
-                .component_unique_id(
-                    PlotViewElementSettingsGroup.Ids.COLOR_SELECTOR
-                ),
+                .component_unique_id(PlotViewElementSettingsGroup.Ids.COLOR_SELECTOR),
                 "content": "You can change here which color you prefer.",
             },
         ]

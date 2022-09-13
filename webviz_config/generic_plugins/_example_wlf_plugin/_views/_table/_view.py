@@ -39,6 +39,7 @@ class Order(StrEnum):
     ASC = "asc"
     DESC = "desc"
 
+
 class TableViewElementSettingsGroup(SettingsGroupABC):
     class Ids(StrEnum):
         ORDER_SELECTOR = "order-selector"
@@ -66,6 +67,7 @@ class TableViewElementSettingsGroup(SettingsGroupABC):
             )
         ]
 
+
 class TableViewElement(ViewElementABC):
     class Ids(StrEnum):
         TABLE = "table"
@@ -75,7 +77,9 @@ class TableViewElement(ViewElementABC):
         super().__init__()
         self.data = data
 
-        self.add_settings_group(TableViewElementSettingsGroup(), TableViewElement.Ids.TABLE_SETTINGS)
+        self.add_settings_group(
+            TableViewElementSettingsGroup(), TableViewElement.Ids.TABLE_SETTINGS
+        )
 
     def inner_layout(self) -> Union[str, Type[Component]]:
         return dash_table.DataTable(

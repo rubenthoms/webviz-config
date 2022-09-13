@@ -1,1 +1,1 @@
-from ._text_view_element import TextViewElement
+from ._text_view_element import TextViewElement, TextViewElementSettingsGroup

@@ -75,6 +75,7 @@ class PlotViewSettingsGroup(SettingsGroupABC):
             )
         ]
 
+
 class PlotViewElementSettingsGroup(SettingsGroupABC):
     class Ids(StrEnum):
         COLOR_SELECTOR = "color-selector"
@@ -109,12 +110,18 @@ class PlotViewElement(ViewElementABC):
     class Ids(StrEnum):
         GRAPH = "graph"
         PLOT_SETTINGS = "plot-settings"
+        PLOT_SETTINGS_2 = "plot-settings-2"
 
     def __init__(self, data: List[Tuple[int, int]]) -> None:
         super().__init__(flex_grow=8)
         self.data = data
 
-        self.add_settings_group(PlotViewElementSettingsGroup(), PlotViewElement.Ids.PLOT_SETTINGS)
+        self.add_settings_group(
+            PlotViewElementSettingsGroup(), PlotViewElement.Ids.PLOT_SETTINGS
+        )
+        self.add_settings_group(
+            PlotViewElementSettingsGroup(), PlotViewElement.Ids.PLOT_SETTINGS_2
+        )
 
     def inner_layout(self) -> Union[str, Type[Component]]:
         return html.Div(
@@ -256,14 +263,17 @@ class PlotView(ViewABC):
                 "value",
             ),
             Input(
-                self.view_element(PlotView.Ids.PLOT).settings_group(PlotViewElement.Ids.PLOT_SETTINGS)
+                self.view_element(PlotView.Ids.PLOT)
+                .settings_group(PlotViewElement.Ids.PLOT_SETTINGS)
                 .component_unique_id(PlotViewElementSettingsGroup.Ids.COLOR_SELECTOR)
                 .to_string(),
                 "value",
             ),
         )
         @callback_typecheck
-        def _change_power_and_coordinates(power: int, coordinates: Coordinates, color: Color) -> dict:
+        def _change_power_and_coordinates(
+            power: int, coordinates: Coordinates, color: Color
+        ) -> dict:
             layout = {
                 "title": "Example Graph Swapped",
                 "margin": {"t": 50, "r": 20, "b": 20, "l": 20},
@@ -279,7 +289,7 @@ class PlotView(ViewABC):
                         {
                             "x": [x[1] for x in self.data],
                             "y": [x[0] for x in self.data],
-                            "line": { "color": "red" if color == Color.RED else "blue"}
+                            "line": {"color": "red" if color == Color.RED else "blue"},
                         }
                     ],
                     "layout": layout,
@@ -289,7 +299,7 @@ class PlotView(ViewABC):
                     {
                         "x": [x[0] for x in self.data],
                         "y": [x[1] for x in self.data],
-                        "line": { "color": "red" if color == Color.RED else "blue"}
+                        "line": {"color": "red" if color == Color.RED else "blue"},
                     }
                 ],
                 "layout": layout,
